@@ -10,7 +10,7 @@ To run tests:
 
 1. build and run docker image
 
-docker compose run
+docker compose run dev
 
 2. inside docker container /workspace directory run script:
 

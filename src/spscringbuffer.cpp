@@ -1,11 +1,12 @@
 #include "spscringbuffer.h"
 
-bool SpscRingBuffer::push() 
+bool SpscRingBuffer::push()
 {
-  return true;
+    return true;
 }
 
 bool SpscRingBuffer::pop()
 {
-  return false;
+    return false;
 }
+

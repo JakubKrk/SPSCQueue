@@ -1,15 +1,19 @@
 #include <gtest/gtest.h>
+
 #include "spscringbuffer.h"
 
-class SpscRingBufferTest : public ::testing::Test {
-protected:
+class SpscRingBufferTest : public ::testing::Test
+{
+  protected:
     SpscRingBuffer buffer;
 };
 
-TEST_F(SpscRingBufferTest, Push) {
+TEST_F(SpscRingBufferTest, Push)
+{
     EXPECT_EQ(buffer.push(), true);
 }
 
-TEST_F(SpscRingBufferTest, Pop) {
+TEST_F(SpscRingBufferTest, Pop)
+{
     EXPECT_EQ(buffer.pop(), false);
 }

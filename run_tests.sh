@@ -1,5 +1,5 @@
-cmake -S . -B build-gcc \
-  -DCMAKE_C_COMPILER=gcc \
-  -DCMAKE_CXX_COMPILER=g++
-cmake --build build-gcc
-cd build-gcc && ctest --output-on-failure
+cmake -S . -B build \
+  -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_CXX_COMPILER=clang++
+cmake --build build
+cd build && ctest --output-on-failure
