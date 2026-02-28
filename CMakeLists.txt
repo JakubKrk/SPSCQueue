@@ -8,15 +8,23 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 include(cmake/Sanitizer.cmake)
 
-include(FetchContent)
-FetchContent_Declare(
-  googletest
-  URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz
-  DOWNLOAD_EXTRACT_TIMESTAMP TRUE
-)
-FetchContent_MakeAvailable(googletest)
-
-enable_testing()
+option(ENABLE_TESTS "Build gtest test suite" ON)
+option(ENABLE_MEMTEST "Build memtest binary" ON)
 
 add_subdirectory(src)
-add_subdirectory(test)
+
+if(ENABLE_TESTS)
+    include(FetchContent)
+    FetchContent_Declare(
+      googletest
+      URL https://github.com/google/googletest/archive/refs/tags/v1.14.0.tar.gz
+      DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+    )
+    FetchContent_MakeAvailable(googletest)
+    enable_testing()
+    add_subdirectory(test)
+endif()
+
+if(ENABLE_MEMTEST)
+    add_subdirectory(memtest)
+endif()

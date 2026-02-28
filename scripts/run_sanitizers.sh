@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -euo pipefail
+cd "$(dirname "$0")/.."
 
 SANITIZERS=(address thread undefined)
 FAILED=()
@@ -12,7 +13,8 @@ for san in "${SANITIZERS[@]}"; do
 
     cmake -S . -B "${build_dir}" -DSANITIZER="${san}" -DCMAKE_BUILD_TYPE=Debug \
       -DCMAKE_C_COMPILER=clang \
-      -DCMAKE_CXX_COMPILER=clang++
+      -DCMAKE_CXX_COMPILER=clang++ \
+      -DENABLE_MEMTEST=OFF
 
     cmake --build "${build_dir}" --parallel
 

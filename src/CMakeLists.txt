@@ -1,5 +1,3 @@
-add_library(spscringbuffer
-    spscringbuffer.cpp
-)
+add_library(spscringbuffer INTERFACE)
 
-target_include_directories(spscringbuffer PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_include_directories(spscringbuffer INTERFACE ${CMAKE_CURRENT_SOURCE_DIR})
