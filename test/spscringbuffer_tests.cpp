@@ -193,3 +193,29 @@ TEST(SpscRingBuffer, ResetAfterWrapAround)
     buf.push(Message{"e", 5});
     EXPECT_EQ(buf.pop()->_value, 5U);
 }
+
+TEST(SpscRingBuffer, PushFromRvalue)
+{
+    SpscRingBuffer<Message> buf{4};
+    buf.push(Message{"rvalue", 1});
+    EXPECT_EQ(buf.pop()->_title, "rvalue");
+}
+
+TEST(SpscRingBuffer, PushFromLvalue)
+{
+    SpscRingBuffer<Message> buf{4};
+    Message msg{"lvalue", 2};
+    buf.push(std::move(msg));
+    EXPECT_EQ(buf.pop()->_title, "lvalue");
+}
+
+TEST(SpscRingBuffer, PushInPlace)
+{
+    SpscRingBuffer<Message> buf{4};
+    buf.push("in-place", 42U);
+    auto val = buf.pop();
+    ASSERT_TRUE(val.has_value());
+    EXPECT_EQ(val->_title, "in-place");
+    EXPECT_EQ(val->_value, 42U);
+}
+

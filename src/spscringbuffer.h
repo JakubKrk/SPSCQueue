@@ -20,10 +20,11 @@ template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuff
         }
         alloc_trait::deallocate(_allocator, _data, _capacity);
     };
-    void push(T element)
+    template <typename... Args>
+    void push(Args &&...args)
     {
         std::size_t i = (_head + _size) % _capacity;
-        alloc_trait::construct(_allocator, _data + i, std::move(element));
+        alloc_trait::construct(_allocator, _data + i, std::forward<Args>(args)...);
         ++_size;
     }
     std::optional<T> pop()
@@ -35,7 +36,7 @@ template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuff
         alloc_trait::destroy(_allocator, _data + _head);
         _head = (_head + 1) % _capacity;
         --_size;
-        return element;
+        return std::move(element);
     }
 
     bool isEmpty() const
