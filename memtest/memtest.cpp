@@ -16,7 +16,7 @@
 static void test_push_pop_fields_initialized()
 {
     SpscRingBuffer<Message> buf{8};
-    buf.push(Message{"hello", 42});
+    assert(buf.try_push(Message{"hello", 42}));
     auto msg = buf.pop();
     assert(msg.has_value());
     assert(msg->_title == "hello");
@@ -29,18 +29,18 @@ static void test_push_pop_fields_initialized()
 static void test_wrap_around_reads_initialized_memory()
 {
     SpscRingBuffer<Message> buf{4};
-    buf.push(Message{"a", 1});
-    buf.push(Message{"b", 2});
-    buf.push(Message{"c", 3});
-    buf.push(Message{"d", 4});
+    assert(buf.try_push(Message{"a", 1}));
+    assert(buf.try_push(Message{"b", 2}));
+    assert(buf.try_push(Message{"c", 3}));
+    assert(buf.try_push(Message{"d", 4}));
 
     auto a = buf.pop();
     auto b = buf.pop();
     assert(a->_value == 1U);
     assert(b->_value == 2U);
 
-    buf.push(Message{"e", 5});
-    buf.push(Message{"f", 6});
+    assert(buf.try_push(Message{"e", 5}));
+    assert(buf.try_push(Message{"f", 6}));
 
     assert(buf.pop()->_value == 3U);
     assert(buf.pop()->_value == 4U);
@@ -56,14 +56,14 @@ static void test_wrap_around_reads_initialized_memory()
 static void test_reset_then_reuse_initialized()
 {
     SpscRingBuffer<Message> buf{4};
-    buf.push(Message{"x", 10});
-    buf.push(Message{"y", 20});
+    assert(buf.try_push(Message{"x", 10}));
+    assert(buf.try_push(Message{"y", 20}));
     buf.reset();
 
     assert(buf.isEmpty());
     assert(buf.size() == 0U);
 
-    buf.push(Message{"new", 99});
+    assert(buf.try_push(Message{"new", 99}));
     auto msg = buf.pop();
     assert(msg.has_value());
     assert(msg->_title == "new");
@@ -74,15 +74,15 @@ static void test_reset_then_reuse_initialized()
 static void test_reset_after_wrap_around()
 {
     SpscRingBuffer<Message> buf{4};
-    buf.push(Message{"a", 1});
-    buf.push(Message{"b", 2});
+    assert(buf.try_push(Message{"a", 1}));
+    assert(buf.try_push(Message{"b", 2}));
     buf.pop();
     buf.pop();
-    buf.push(Message{"c", 3});
-    buf.push(Message{"d", 4});
+    assert(buf.try_push(Message{"c", 3}));
+    assert(buf.try_push(Message{"d", 4}));
     buf.reset();
 
-    buf.push(Message{"e", 5});
+    assert(buf.try_push(Message{"e", 5}));
     auto msg = buf.pop();
     assert(msg->_value == 5U);
     assert(msg->_data != nullptr);
@@ -96,14 +96,14 @@ static void test_state_queries_initialized()
     assert(!buf.isFull());
     assert(buf.size() == 0U);
 
-    buf.push(Message{"m", 1});
+    assert(buf.try_push(Message{"m", 1}));
     assert(!buf.isEmpty());
     assert(!buf.isFull());
     assert(buf.size() == 1U);
 
-    buf.push(Message{"m", 2});
-    buf.push(Message{"m", 3});
-    buf.push(Message{"m", 4});
+    assert(buf.try_push(Message{"m", 2}));
+    assert(buf.try_push(Message{"m", 3}));
+    assert(buf.try_push(Message{"m", 4}));
     assert(buf.isFull());
     assert(buf.size() == 4U);
 
