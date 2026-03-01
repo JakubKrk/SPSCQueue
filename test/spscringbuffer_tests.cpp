@@ -251,3 +251,24 @@ TEST(SpscRingBuffer, PushSucceedsAgainAfterPop)
     EXPECT_EQ(buf.pop()->_title, "b");
     EXPECT_EQ(buf.pop()->_title, "c");
 }
+
+TEST(SpscRingBuffer, ZeroCapacityThrows)
+{
+    EXPECT_THROW(SpscRingBuffer<Message>{0}, std::invalid_argument);
+}
+
+TEST(SpscRingBuffer, NonPowerOfTwoCapacityThrows)
+{
+    EXPECT_THROW(SpscRingBuffer<Message>{3},  std::invalid_argument);
+    EXPECT_THROW(SpscRingBuffer<Message>{5},  std::invalid_argument);
+    EXPECT_THROW(SpscRingBuffer<Message>{6},  std::invalid_argument);
+    EXPECT_THROW(SpscRingBuffer<Message>{100}, std::invalid_argument);
+}
+
+TEST(SpscRingBuffer, PowerOfTwoCapacityDoesNotThrow)
+{
+    EXPECT_NO_THROW(SpscRingBuffer<Message>{1});
+    EXPECT_NO_THROW(SpscRingBuffer<Message>{2});
+    EXPECT_NO_THROW(SpscRingBuffer<Message>{4});
+    EXPECT_NO_THROW(SpscRingBuffer<Message>{1024});
+}
