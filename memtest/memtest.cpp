@@ -21,7 +21,6 @@ static void test_push_pop_fields_initialized()
     assert(msg.has_value());
     assert(msg->_title == "hello");
     assert(msg->_value == 42U);
-    assert(msg->_data != nullptr);
     msg->_data[0] = 1;
     assert(msg->_data[0] == 1);
 }
@@ -49,8 +48,8 @@ static void test_wrap_around_reads_initialized_memory()
     auto f = buf.pop();
     assert(e->_value == 5U);
     assert(f->_value == 6U);
-    assert(e->_data != nullptr);
-    assert(f->_data != nullptr);
+    assert(e->_data[0] == 1);
+    assert(f->_data[0] == 1);
 }
 
 static void test_reset_then_reuse_initialized()
@@ -68,7 +67,7 @@ static void test_reset_then_reuse_initialized()
     assert(msg.has_value());
     assert(msg->_title == "new");
     assert(msg->_value == 99U);
-    assert(msg->_data != nullptr);
+    assert(msg->_data[0] == 1);
 }
 
 static void test_reset_after_wrap_around()
@@ -85,7 +84,7 @@ static void test_reset_after_wrap_around()
     assert(buf.try_push(Message{"e", 5}));
     auto msg = buf.pop();
     assert(msg->_value == 5U);
-    assert(msg->_data != nullptr);
+    assert(msg->_data[0] == 1);
     assert(buf.isEmpty());
 }
 

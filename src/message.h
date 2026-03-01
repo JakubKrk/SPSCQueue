@@ -1,4 +1,5 @@
 #pragma once
+#include <array>
 #include <cstdint>
 #include <string>
 
@@ -9,36 +10,17 @@ class Message
     Message() = delete;
     explicit Message(std::string title, uint64_t value) : _title(title), _value(value)
     {
-        _data = new uint16_t[10];
+        _data.fill(1);
     }
 
+    ~Message() = default;
     Message(const Message &) = delete;
     Message &operator=(const Message &) = delete;
 
-    Message(Message &&other) noexcept : _title(std::move(other._title)), _value(other._value), _data(other._data)
-    {
-        other._data = nullptr;
-    }
-
-    Message &operator=(Message &&other) noexcept
-    {
-        if (this != &other)
-        {
-            delete[] _data;
-            _title = std::move(other._title);
-            _value = other._value;
-            _data = other._data;
-            other._data = nullptr;
-        }
-        return *this;
-    }
-
-    ~Message()
-    {
-        delete[] _data;
-    }
+    Message(Message &&other) noexcept = default;
+    Message &operator=(Message &&other) noexcept = default;
 
     std::string _title;
     std::uint64_t _value;
-    uint16_t *_data;
+    std::array<uint16_t, 10> _data;
 };

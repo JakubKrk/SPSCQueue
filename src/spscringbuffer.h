@@ -1,4 +1,5 @@
 #pragma once
+#include <atomic>
 #include <cstddef>
 #include <optional>
 
@@ -6,65 +7,85 @@ template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuff
 {
   public:
     using alloc_trait = std::allocator_traits<Allocator>;
+
     SpscRingBuffer() = delete;
     explicit SpscRingBuffer(std::size_t capacity, const Allocator &allocator = Allocator{})
         : _capacity(capacity), _allocator(allocator), _data(alloc_trait::allocate(_allocator, _capacity))
     {
     }
+
     ~SpscRingBuffer()
     {
-        for (size_t i = 0; i < _size; ++i)
-        {
-            size_t idx = (_head + i) % _capacity;
-            alloc_trait::destroy(_allocator, _data + idx);
-        }
+        std::size_t pop = _popper.load(std::memory_order_relaxed);
+        std::size_t push = _pusher.load(std::memory_order_relaxed);
+        for (; pop != push; ++pop)
+            alloc_trait::destroy(_allocator, get(pop));
         alloc_trait::deallocate(_allocator, _data, _capacity);
-    };
+    }
+
     template <typename... Args> [[nodiscard]] bool try_push(Args &&...args)
     {
-        if (isFull())
+        std::size_t push = _pusher.load(std::memory_order_relaxed);
+        std::size_t pop = _popper.load(std::memory_order_acquire);
+        if (push - pop == _capacity)
             return false;
-        alloc_trait::construct(_allocator, _data + (_head + _size) % _capacity, std::forward<Args>(args)...);
-        ++_size;
+        alloc_trait::construct(_allocator, get(push), std::forward<Args>(args)...);
+        _pusher.store(push + 1, std::memory_order_release);
         return true;
     }
+
     std::optional<T> pop()
     {
-        if (isEmpty())
+        std::size_t pop = _popper.load(std::memory_order_relaxed);
+        std::size_t push = _pusher.load(std::memory_order_acquire);
+        if (pop == push)
             return std::nullopt;
-
-        T element = std::move(_data[_head]);
-        alloc_trait::destroy(_allocator, _data + _head);
-        _head = (_head + 1) % _capacity;
-        --_size;
+        T element = std::move(*get(pop));
+        alloc_trait::destroy(_allocator, get(pop));
+        _popper.store(pop + 1, std::memory_order_release);
         return std::move(element);
     }
 
     bool isEmpty() const
     {
-        return _size == 0;
+        std::size_t pop = _popper.load(std::memory_order_acquire);
+        std::size_t push = _pusher.load(std::memory_order_acquire);
+        return push == pop;
     }
+
     bool isFull() const
     {
-        return _size == _capacity;
+        std::size_t push = _pusher.load(std::memory_order_acquire);
+        std::size_t pop = _popper.load(std::memory_order_acquire);
+        return push - pop == _capacity;
     }
+
     std::size_t size() const
     {
-        return _size;
+        std::size_t pop = _popper.load(std::memory_order_acquire);
+        std::size_t push = _pusher.load(std::memory_order_acquire);
+        return push - pop;
     }
 
     void reset()
     {
-        for (std::size_t i = 0; i < _size; ++i)
-            alloc_trait::destroy(_allocator, _data + (_head + i) % _capacity);
-        _head = 0;
-        _size = 0;
+        std::size_t pop = _popper.load(std::memory_order_relaxed);
+        std::size_t push = _pusher.load(std::memory_order_relaxed);
+        for (; pop != push; ++pop)
+            alloc_trait::destroy(_allocator, get(pop));
+        _pusher.store(0, std::memory_order_relaxed);
+        _popper.store(0, std::memory_order_relaxed);
     }
 
   private:
+    T *get(std::size_t position) noexcept
+    {
+        return &_data[position % _capacity];
+    }
+
     Allocator _allocator;
-    std::size_t _capacity{0U};
-    std::size_t _head{0U};
-    std::size_t _size{0U};
-    T *_data{nullptr};
+    const std::size_t _capacity;
+    T *_data;
+    alignas(64) std::atomic<std::size_t> _pusher{0};
+    alignas(64) std::atomic<std::size_t> _popper{0};
 };
