@@ -2,6 +2,7 @@
 #include <atomic>
 #include <cstddef>
 #include <optional>
+#include <stdexcept>
 
 template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuffer
 {
@@ -9,9 +10,17 @@ template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuff
     using alloc_trait = std::allocator_traits<Allocator>;
 
     SpscRingBuffer() = delete;
+    SpscRingBuffer(const SpscRingBuffer &) = delete;
+    SpscRingBuffer &operator=(const SpscRingBuffer &) = delete;
+    SpscRingBuffer(SpscRingBuffer &&) = delete;
+    SpscRingBuffer &operator=(SpscRingBuffer &&) = delete;
+
     explicit SpscRingBuffer(std::size_t capacity, const Allocator &allocator = Allocator{})
-        : _capacity(capacity), _allocator(allocator), _data(alloc_trait::allocate(_allocator, _capacity))
+        : _capacity(capacity), _mask(capacity - 1), _allocator(allocator),
+          _data(alloc_trait::allocate(_allocator, _capacity))
     {
+        if (capacity == 0 || (capacity & (capacity - 1)) != 0)
+            throw std::invalid_argument("Capacity must be a non-zero power of two");
     }
 
     ~SpscRingBuffer()
@@ -78,14 +87,13 @@ template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuff
     }
 
   private:
-    T *get(std::size_t position) noexcept
-    {
-        return &_data[position % _capacity];
-    }
+    T *get(std::size_t position) noexcept { return &_data[position & _mask]; }
 
     Allocator _allocator;
     const std::size_t _capacity;
+    const std::size_t _mask;
     T *_data;
     alignas(64) std::atomic<std::size_t> _pusher{0};
     alignas(64) std::atomic<std::size_t> _popper{0};
+    static_assert(std::atomic<size_t>::is_always_lock_free);
 };
