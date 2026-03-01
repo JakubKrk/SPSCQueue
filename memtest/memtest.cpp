@@ -59,7 +59,7 @@ static void test_reset_then_reuse_initialized()
     assert(buf.try_push(Message{"y", 20}));
     buf.reset();
 
-    assert(buf.isEmpty());
+    assert(buf.is_empty());
     assert(buf.size() == 0U);
 
     assert(buf.try_push(Message{"new", 99}));
@@ -85,29 +85,29 @@ static void test_reset_after_wrap_around()
     auto msg = buf.pop();
     assert(msg->_value == 5U);
     assert(msg->_data[0] == 1);
-    assert(buf.isEmpty());
+    assert(buf.is_empty());
 }
 
 static void test_state_queries_initialized()
 {
     SpscRingBuffer<Message> buf{4};
-    assert(buf.isEmpty());
-    assert(!buf.isFull());
+    assert(buf.is_empty());
+    assert(!buf.is_full());
     assert(buf.size() == 0U);
 
     assert(buf.try_push(Message{"m", 1}));
-    assert(!buf.isEmpty());
-    assert(!buf.isFull());
+    assert(!buf.is_empty());
+    assert(!buf.is_full());
     assert(buf.size() == 1U);
 
     assert(buf.try_push(Message{"m", 2}));
     assert(buf.try_push(Message{"m", 3}));
     assert(buf.try_push(Message{"m", 4}));
-    assert(buf.isFull());
+    assert(buf.is_full());
     assert(buf.size() == 4U);
 
     buf.pop();
-    assert(!buf.isFull());
+    assert(!buf.is_full());
     assert(buf.size() == 3U);
 }
 

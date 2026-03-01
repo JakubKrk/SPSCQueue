@@ -74,14 +74,14 @@ template <typename T, typename Allocator = std::allocator<T>> class SpscRingBuff
         return std::move(*result);
     }
 
-    bool isEmpty() const
+    bool is_empty() const
     {
         std::size_t pop = _popper.load(std::memory_order_acquire);
         std::size_t push = _pusher.load(std::memory_order_acquire);
         return push == pop;
     }
 
-    bool isFull() const
+    bool is_full() const
     {
         std::size_t push = _pusher.load(std::memory_order_acquire);
         std::size_t pop = _popper.load(std::memory_order_acquire);

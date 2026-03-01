@@ -36,16 +36,16 @@ SPSC Ring Buffer API:
 + void push_wait(args)
     tries to push element into queue. Yields thread if operation is unsuccessful and tries again. Bigger latenct than try_push, but lower CPU usage.
 
-+ std::optional<T> pop()
++ optional T pop()
     tries to pop element from the front of the queue. Returns std::optional if queue is empty. Return element if queue is not empty and operation is successful. To use in spin loop with low latency.
 
 + T pop_wait()
     tries to pop element from the front of the queue. Yields the thread and tries again if unsuccessful. Bigger latency than pop, but lower CPU usage.
 
-+ bool isFull()
++ bool is_full()
     check if queue if full.
 
-+ bool isEmpty()
++ bool is_empty()
     checks if queue is empty.
 
 + size_t size()
@@ -59,7 +59,7 @@ Limitations:
 
 + Desctruction/reset of the queue must happen after producer/consumer threads finished the work to ensure no memory leak.
 
-+ isFull, isEmpty, size are only approximates
++ is_full, is_empty, size are only approximates
 
 + Not resizeable.
 

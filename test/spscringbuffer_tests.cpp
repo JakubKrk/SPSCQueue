@@ -94,7 +94,7 @@ TEST(SpscRingBuffer, InterleavedPushPop)
 TEST(SpscRingBuffer, IsEmptyOnNewBuffer)
 {
     SpscRingBuffer<Message> buf{4};
-    EXPECT_TRUE(buf.isEmpty());
+    EXPECT_TRUE(buf.is_empty());
     EXPECT_EQ(buf.size(), 0U);
 }
 
@@ -102,7 +102,7 @@ TEST(SpscRingBuffer, IsEmptyFalseAfterPush)
 {
     SpscRingBuffer<Message> buf{4};
     ASSERT_TRUE(buf.try_push(Message{"a", 1}));
-    EXPECT_FALSE(buf.isEmpty());
+    EXPECT_FALSE(buf.is_empty());
     EXPECT_EQ(buf.size(), 1U);
 }
 
@@ -111,20 +111,20 @@ TEST(SpscRingBuffer, IsEmptyTrueAfterDrain)
     SpscRingBuffer<Message> buf{4};
     ASSERT_TRUE(buf.try_push(Message{"a", 1}));
     buf.pop();
-    EXPECT_TRUE(buf.isEmpty());
+    EXPECT_TRUE(buf.is_empty());
     EXPECT_EQ(buf.size(), 0U);
 }
 
 TEST(SpscRingBuffer, IsFullWhenAtCapacity)
 {
     SpscRingBuffer<Message> buf{4};
-    EXPECT_FALSE(buf.isFull());
+    EXPECT_FALSE(buf.is_full());
     ASSERT_TRUE(buf.try_push(Message{"a", 1}));
     ASSERT_TRUE(buf.try_push(Message{"b", 2}));
     ASSERT_TRUE(buf.try_push(Message{"c", 3}));
-    EXPECT_FALSE(buf.isFull());
+    EXPECT_FALSE(buf.is_full());
     ASSERT_TRUE(buf.try_push(Message{"d", 4}));
-    EXPECT_TRUE(buf.isFull());
+    EXPECT_TRUE(buf.is_full());
 }
 
 TEST(SpscRingBuffer, IsFullFalseAfterPop)
@@ -135,7 +135,7 @@ TEST(SpscRingBuffer, IsFullFalseAfterPop)
     ASSERT_TRUE(buf.try_push(Message{"c", 3}));
     ASSERT_TRUE(buf.try_push(Message{"d", 4}));
     buf.pop();
-    EXPECT_FALSE(buf.isFull());
+    EXPECT_FALSE(buf.is_full());
 }
 
 TEST(SpscRingBuffer, SizeTracksElements)
@@ -159,9 +159,9 @@ TEST(SpscRingBuffer, ResetEmptiesBuffer)
     ASSERT_TRUE(buf.try_push(Message{"a", 1}));
     ASSERT_TRUE(buf.try_push(Message{"b", 2}));
     buf.reset();
-    EXPECT_TRUE(buf.isEmpty());
+    EXPECT_TRUE(buf.is_empty());
     EXPECT_EQ(buf.size(), 0U);
-    EXPECT_FALSE(buf.isFull());
+    EXPECT_FALSE(buf.is_full());
 
     EXPECT_EQ(buf.pop(), std::nullopt);
 }
@@ -190,7 +190,7 @@ TEST(SpscRingBuffer, ResetAfterWrapAround)
     ASSERT_TRUE(buf.try_push(Message{"c", 3}));
     ASSERT_TRUE(buf.try_push(Message{"d", 4}));
     buf.reset();
-    EXPECT_TRUE(buf.isEmpty());
+    EXPECT_TRUE(buf.is_empty());
     ASSERT_TRUE(buf.try_push(Message{"e", 5}));
     EXPECT_EQ(buf.pop()->_value, 5U);
 }
