@@ -259,9 +259,9 @@ TEST(SpscRingBuffer, ZeroCapacityThrows)
 
 TEST(SpscRingBuffer, NonPowerOfTwoCapacityThrows)
 {
-    EXPECT_THROW(SpscRingBuffer<Message>{3},  std::invalid_argument);
-    EXPECT_THROW(SpscRingBuffer<Message>{5},  std::invalid_argument);
-    EXPECT_THROW(SpscRingBuffer<Message>{6},  std::invalid_argument);
+    EXPECT_THROW(SpscRingBuffer<Message>{3}, std::invalid_argument);
+    EXPECT_THROW(SpscRingBuffer<Message>{5}, std::invalid_argument);
+    EXPECT_THROW(SpscRingBuffer<Message>{6}, std::invalid_argument);
     EXPECT_THROW(SpscRingBuffer<Message>{100}, std::invalid_argument);
 }
 
